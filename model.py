@@ -144,7 +144,7 @@ class Noob(PreTrainedModel):
 
     @classmethod
     def from_pretrained(cls, pretrained_model_name_or_path, *model_args, **kwargs):
-        config = GPTConfig.from_pretrained(pretrained_model_name_or_path, *model_args, **kwargs)
+        config = NoobConfig.from_pretrained(pretrained_model_name_or_path, *model_args, **kwargs)
         model = cls(config)
         model.load_state_dict(torch.load(f"{pretrained_model_name_or_path}/pytorch_model.bin"))
         return model

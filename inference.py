@@ -1,29 +1,41 @@
 import torch
 import argparse
 import time
-from model import GPT, encode, decode
+import json
+from model import Noob
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
+
+def load_vocab(model_path):
+    """加载词汇表"""
+    with open(f"{model_path}/vocab.json", 'r', encoding='utf-8') as f:
+        stoi = json.load(f)
+    itos = {i: ch for ch, i in stoi.items()}
+    encode = lambda s: [stoi[c] for c in s]
+    decode = lambda l: ''.join([itos[i] for i in l])
+    return encode, decode
 
 def load_model(model_path):
     """加载预训练模型"""
     print(f"Loading model from {model_path}...")
     start_time = time.time()
     
-    # 创建模型实例
-    model = GPT()
-    model.load_state_dict(torch.load(model_path))
+    # 加载模型和词汇表
+    model = Noob.from_pretrained(model_path)
     model = model.to(device)
-    model.eval()  # 设置为评估模式
+    model.eval()
+    encode, decode = load_vocab(model_path)
     
     elapsed_time = time.time() - start_time
     print(f"Model loaded in {elapsed_time:.2f} seconds")
-    return model
+    return model, encode, decode
 
-def generate_text(model, prompt="", max_new_tokens=500, temperature=1.0):
+def generate_text(model, encode, decode, prompt="", max_new_tokens=500, temperature=1.0):
     """生成文本
     Args:
-        model: GPT模型实例
+        model: Noob模型实例
+        encode: 编码函数
+        decode: 解码函数
         prompt: 起始提示文本
         max_new_tokens: 最大生成token数
         temperature: 采样温度，控制生成文本的随机性
@@ -47,9 +59,9 @@ def generate_text(model, prompt="", max_new_tokens=500, temperature=1.0):
     return output_text
 
 def main():
-    parser = argparse.ArgumentParser(description='Generate text using trained GPT model')
-    parser.add_argument('--model_path', type=str, default='model_params.pth',
-                       help='Path to the saved model parameters')
+    parser = argparse.ArgumentParser(description='Generate text using trained Noob model')
+    parser.add_argument('--model_path', type=str, default='noob_model',
+                       help='Path to the saved model directory')
     parser.add_argument('--prompt', type=str, default="",
                        help='Starting prompt for text generation')
     parser.add_argument('--max_tokens', type=int, default=500,
@@ -59,13 +71,15 @@ def main():
     args = parser.parse_args()
 
     try:
-        # 加载模型
-        model = load_model(args.model_path)
+        # 加载模型和词汇表函数
+        model, encode, decode = load_model(args.model_path)
         
         # 生成文本
         generated_text = generate_text(
-            model, 
-            args.prompt, 
+            model,
+            encode,
+            decode,
+            args.prompt,
             args.max_tokens,
             args.temperature
         )
@@ -77,7 +91,7 @@ def main():
         print("=" * 50)
         
     except FileNotFoundError:
-        print(f"Error: Model file '{args.model_path}' not found.")
+        print(f"Error: Model directory '{args.model_path}' not found.")
     except Exception as e:
         print(f"Error occurred: {str(e)}")
 
