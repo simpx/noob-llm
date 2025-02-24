@@ -83,5 +83,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     model = train()
+    
+    NoobConfig.register_for_auto_class()
+    Noob.register_for_auto_class("AutoModelForCausalLM")
     model.save_pretrained(args.save_dir)
     print(f"Model saved to {args.save_dir}")
