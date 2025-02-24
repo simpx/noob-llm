@@ -1,7 +1,7 @@
 import torch
 import time
 import argparse
-from model import GPT, encode, decode, batch_size, block_size
+from model import Noob, NoobConfig, encode, decode, batch_size, block_size
 
 # 训练相关超参数
 max_iters = 5000
@@ -41,12 +41,9 @@ def estimate_loss(model):
     model.train()
     return out
 
-def save_model(model, filename):
-    torch.save(model.state_dict(), filename)
-    print(f"Model saved to {filename}")
-
 def train():
-    model = GPT()
+    config = NoobConfig()
+    model = Noob(config)
     m = model.to(device)
     print(f"Number of parameters: {sum(p.numel() for p in m.parameters())/1e6:.2f}M")
 
@@ -81,9 +78,10 @@ def train():
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Train language model')
-    parser.add_argument('--filename', type=str, default='model_params.pth',
-                       help='Filename to save the model parameters')
+    parser.add_argument('--save_dir', type=str, default='noob_model',
+                        help='Directory to save the model')
     args = parser.parse_args()
 
     model = train()
-    save_model(model, args.filename)
+    model.save_pretrained(args.save_dir)
+    print(f"Model saved to {args.save_dir}")
