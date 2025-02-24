@@ -4,7 +4,7 @@ import argparse
 from model import Noob, NoobConfig, encode, decode, batch_size, block_size
 
 # 训练相关超参数
-max_iters = 5000
+max_iters = 500
 eval_interval = 500
 learning_rate = 3e-4
 eval_iters = 200

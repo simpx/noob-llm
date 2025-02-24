@@ -138,13 +138,5 @@ class Noob(PreTrainedModel):
 
     def save_pretrained(self, save_directory):
         super().save_pretrained(save_directory)
-        torch.save(self.state_dict(), f"{save_directory}/pytorch_model.bin")
         with open(f"{save_directory}/vocab.json", "w") as f:
             json.dump(stoi, f)
-
-    @classmethod
-    def from_pretrained(cls, pretrained_model_name_or_path, *model_args, **kwargs):
-        config = NoobConfig.from_pretrained(pretrained_model_name_or_path, *model_args, **kwargs)
-        model = cls(config)
-        model.load_state_dict(torch.load(f"{pretrained_model_name_or_path}/pytorch_model.bin"))
-        return model
