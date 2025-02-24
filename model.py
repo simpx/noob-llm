@@ -1,6 +1,8 @@
+import json
 import torch
 import torch.nn as nn
 from torch.nn import functional as F
+from transformers import PreTrainedModel, PretrainedConfig
 
 # 超参数
 batch_size = 64  # 一批包含的文本序列个数
@@ -22,6 +24,14 @@ stoi = { ch:i for i,ch in enumerate(chars) }
 itos = { i:ch for i,ch in enumerate(chars) }
 encode = lambda s: [stoi[c] for c in s]
 decode = lambda l: ''.join([itos[i] for i in l])
+
+class NoobConfig(PretrainedConfig):
+    model_type = "Noob"
+    vocab_size = vocab_size
+    n_positions = block_size
+    n_embd = n_embed
+    n_layer = n_layer
+    n_head = n_head
 
 class Head(nn.Module):
     """ one head of self-attention """
@@ -86,14 +96,16 @@ class Block(nn.Module):
         x = x + self.ffwd(self.ln2(x))
         return x
 
-class GPT(nn.Module):
-    def __init__(self):
-        super().__init__()
-        self.token_embedding_table = nn.Embedding(vocab_size, n_embed)
-        self.position_embedding_table = nn.Embedding(block_size, n_embed)
-        self.blocks = nn.Sequential(*[Block(n_embed, n_head=n_head) for _ in range(n_layer)])
-        self.ln_final = nn.LayerNorm(n_embed)
-        self.lm_head = nn.Linear(n_embed, vocab_size)
+class Noob(PreTrainedModel):
+    config_class = NoobConfig
+
+    def __init__(self, config):
+        super().__init__(config)
+        self.token_embedding_table = nn.Embedding(config.vocab_size, config.n_embd)
+        self.position_embedding_table = nn.Embedding(config.n_positions, config.n_embd)
+        self.blocks = nn.Sequential(*[Block(config.n_embd, config.n_head) for _ in range(config.n_layer)])
+        self.ln_final = nn.LayerNorm(config.n_embd)
+        self.lm_head = nn.Linear(config.n_embd, config.vocab_size)
 
     def forward(self, idx, targets=None):
         B, T = idx.shape
@@ -123,3 +135,16 @@ class GPT(nn.Module):
             idx_next = torch.multinomial(probs, num_samples=1)
             idx = torch.cat((idx, idx_next), dim=1)
         return idx
+
+    def save_pretrained(self, save_directory):
+        super().save_pretrained(save_directory)
+        torch.save(self.state_dict(), f"{save_directory}/pytorch_model.bin")
+        with open(f"{save_directory}/vocab.json", "w") as f:
+            json.dump(stoi, f)
+
+    @classmethod
+    def from_pretrained(cls, pretrained_model_name_or_path, *model_args, **kwargs):
+        config = GPTConfig.from_pretrained(pretrained_model_name_or_path, *model_args, **kwargs)
+        model = cls(config)
+        model.load_state_dict(torch.load(f"{pretrained_model_name_or_path}/pytorch_model.bin"))
+        return model
