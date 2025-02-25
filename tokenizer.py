@@ -43,17 +43,8 @@ class NoobTokenizer(PreTrainedTokenizer):
 
     def save_vocabulary(self, save_directory: str, filename_prefix: Optional[str] = None) -> tuple:
         vocab_file = os.path.join(save_directory, 'vocab.json')
-        
+
         with open(vocab_file, 'w', encoding='utf-8') as f:
             json.dump(self.stoi, f, ensure_ascii=False)
             
         return (vocab_file,)
-    
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Train tokenizer')
-    parser.add_argument('--save_dir', type=str, default='noob_model',
-                        help='Directory to save the tokenizer')
-    args = parser.parse_args()
-    tokenizer = NoobTokenizer()
-    tokenizer.save_pretrained(args.save_dir)
-    print(f"Model saved to {args.save_dir}")

@@ -2,6 +2,7 @@ import torch
 import time
 import argparse
 from model import Noob, NoobConfig, encode, decode, batch_size, block_size
+from tokenizer import NoobTokenizer
 
 # 训练相关超参数
 max_iters = 500
@@ -88,3 +89,9 @@ if __name__ == "__main__":
     Noob.register_for_auto_class("AutoModelForCausalLM")
     model.save_pretrained(args.save_dir)
     print(f"Model saved to {args.save_dir}")
+
+
+    NoobTokenizer.register_for_auto_class("AutoTokenizer")
+    tokenizer = NoobTokenizer()
+    tokenizer.save_pretrained(args.save_dir)
+    print(f"Tokenizer saved to {args.save_dir}")

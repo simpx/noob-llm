@@ -12,18 +12,7 @@ n_head = 6
 n_layer = 6
 dropout = 0.2
 
-# 准备词汇表
-with open('input.txt', 'r', encoding='utf-8') as f:
-    text = f.read()
-
-chars = sorted(list(set(text)))
-vocab_size = len(chars)
-
-# decode、encode函数，在序号和字符间转换
-stoi = { ch:i for i,ch in enumerate(chars) }
-itos = { i:ch for i,ch in enumerate(chars) }
-encode = lambda s: [stoi[c] for c in s]
-decode = lambda l: ''.join([itos[i] for i in l])
+vocab_size = 65
 
 class NoobConfig(PretrainedConfig):
     model_type = "Noob"
