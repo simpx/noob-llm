@@ -1,7 +1,7 @@
 import torch
 import time
 import argparse
-from model import Noob, NoobConfig, encode, decode, batch_size, block_size
+from model import Noob, NoobConfig, batch_size, block_size
 from tokenizer import NoobTokenizer
 
 # 训练相关超参数
@@ -14,6 +14,11 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 # 准备训练数据
 with open('input.txt', 'r', encoding='utf-8') as f:
     text = f.read()
+
+tokenizer = NoobTokenizer()
+
+encode = tokenizer.encode
+decode = tokenizer.decode
 
 data = torch.tensor(encode(text), dtype=torch.long)
 n = int(0.9*len(data))

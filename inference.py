@@ -3,17 +3,13 @@ import argparse
 import time
 import json
 from model import Noob
+from tokenizer import NoobTokenizer
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
+tokenizer = NoobTokenizer()
 
 def load_vocab(model_path):
-    """加载词汇表"""
-    with open(f"{model_path}/vocab.json", 'r', encoding='utf-8') as f:
-        stoi = json.load(f)
-    itos = {i: ch for ch, i in stoi.items()}
-    encode = lambda s: [stoi[c] for c in s]
-    decode = lambda l: ''.join([itos[i] for i in l])
-    return encode, decode
+    return tokenizer.encode, tokenizer.decode
 
 def load_model(model_path):
     """加载预训练模型"""

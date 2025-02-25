@@ -124,8 +124,3 @@ class Noob(PreTrainedModel):
             idx_next = torch.multinomial(probs, num_samples=1)
             idx = torch.cat((idx, idx_next), dim=1)
         return idx
-
-    def save_pretrained(self, save_directory, **kwargs):
-        super().save_pretrained(save_directory, **kwargs)
-        with open(f"{save_directory}/vocab.json", "w") as f:
-            json.dump(stoi, f)
