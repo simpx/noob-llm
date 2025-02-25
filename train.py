@@ -5,7 +5,7 @@ from model import Noob, NoobConfig, batch_size, block_size
 from tokenizer import NoobTokenizer
 
 # 训练相关超参数
-max_iters = 500
+max_iters = 5000
 eval_interval = 500
 learning_rate = 3e-4
 eval_iters = 200
